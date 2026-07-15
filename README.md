@@ -82,3 +82,32 @@ charts use self-reported per-cell figures (pi's true per-task costs are
 proportionally higher than its self-report). Empryo indexes the fixture inside
 the run (~2s, no LLM). Costs shown per each agent's pricing tables; billed
 totals from the Console are the source of truth.
+
+## Round: real-world bugs (harness-real/)
+
+The follow-up round leaves the synthetic fixture behind: **five real bugs from
+real OSS repos** (hono ×2, zod, ky ×2), each taken from a merged fix PR:
+
+- the agent gets the **real issue text verbatim** — user-written symptom
+  reports, no file names, no hints
+- the workspace is the repo at the fix PR's **parent commit** (bug live), with
+  git history rewritten to a single baseline commit so the real fix is
+  unreachable (`git log` reveals nothing)
+- hidden acceptance = **the fix PR's own regression tests**, held outside the
+  workspace and dropped in after the run
+- every fix merged **after 2026-01** — past the models' training cutoffs, so
+  no agent can regurgitate a memorized patch
+- `harness-real/validate.ts` proves every task discriminates (tests fail by
+  assertion on the bug, pass on the real fix) before a single token is spent
+
+```sh
+bun harness-real/validate.ts                     # no API keys needed
+PI_BENCH_KEY=sk-... EMPRYO_BENCH_KEY=sk-... \
+  bun harness-real/run-real.ts --tiers haiku,opus --label my-real-run
+```
+
+Note on methodology: official runs pre-warm Empryo's genome index and report
+the wall-clock separately (`prewarmMs` per row). The portable harness can't
+pre-warm without Empryo's source, so indexing lands inside the timed run —
+Empryo's numbers here are slightly worse than the official method, never
+better.
