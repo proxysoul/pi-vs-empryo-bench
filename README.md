@@ -83,6 +83,29 @@ proportionally higher than its self-report). Empryo indexes the fixture inside
 the run (~2s, no LLM). Costs shown per each agent's pricing tables; billed
 totals from the Console are the source of truth.
 
+## Console-verified result — real-world round (Anthropic billing, 2026-07-16)
+
+| | [Empryo](https://empryo.com) | [pi](https://github.com/badlogic/pi-mono) 0.80.7 |
+|---|---|---|
+| bugs fixed | **7 / 10** | 6 / 10 |
+| cost billed | **$7.08** | $9.19 (**+30%**) |
+| steps | **274** | 382 |
+| wall clock | **22m 30s** | 32m 55s |
+
+Self-accounting audit, round two: **Empryo's self-report matched the console
+again** ($7.06 said vs $7.08 billed — display rounding). pi 0.80.7 fixed round
+1's per-message undercounting (its Haiku tier matched exactly) but still
+under-reported by **$2.94 (32%)** — its crashed Opus cell burned ~8 minutes of
+billed model work and reported $0.00 because the process died before emitting
+its accounting event. Raw rows: `results/vs-real-round3-final-merged.json`
+(the voided cell and its retry are both preserved).
+
+Tier story: at **Haiku** Empryo swept — 3/5 vs 2/5 fixed, 19% cheaper, exactly
+half the wall clock. At **Opus** both fixed 4/5; only Empryo cracked zod's
+parser regression on the first attempt (33 steps / $2.10 vs a hung first try
+and a 69-step / $2.42 retry). ky's extend-retry bug defeated both agents at
+both tiers.
+
 ## Round: real-world bugs (harness-real/)
 
 The follow-up round leaves the synthetic fixture behind: **five real bugs from
